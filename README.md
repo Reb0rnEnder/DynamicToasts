@@ -3,7 +3,7 @@ NOTE: Made in mind with Dynamic
 ## Usage
 Example:
 ```luau
-local DynamicToasts = loadstring("https://raw.githubusercontent.com/Reb0rnEnder/DynamicToasts/refs/heads/main/module.luau")()()
+local DynamicToasts = loadstring("https://raw.githubusercontent.com/Reb0rnEnder/DynamicToasts/refs/heads/main/module.luau")()
 
 DynamicToasts:NewToast(DynamicToasts.ToastType.Info, "Example Title", "Example Description", 5)
 ```
