@@ -42,9 +42,7 @@ local DynamicToasts = {
 			Toast = Instance.new("Frame"),
 			Container = Instance.new("Frame"),
 			ToastTitle = Instance.new("TextLabel"),
-			TTTextSizeConstraint = Instance.new("UITextSizeConstraint"),
 			ToastDescription = Instance.new("TextLabel"),
-			TDTextSizeConstraint = Instance.new("UITextSizeConstraint"),
 			FlexItem = Instance.new("UIFlexItem"),
 			Corner = Instance.new("UICorner"),
 			ListLayout = Instance.new("UIListLayout"),
@@ -73,14 +71,9 @@ local DynamicToasts = {
 		ToastElements.ToastTitle.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
 		ToastElements.ToastTitle.TextColor3 = Color3.new(1, 1, 1)
 		ToastElements.ToastTitle.TextSize = TTTextSize
-		ToastElements.ToastTitle.TextScaled = true
 		ToastElements.ToastTitle.TextTruncate = Enum.TextTruncate.AtEnd
 		ToastElements.ToastTitle.TextXAlignment = Enum.TextXAlignment.Right
 		ToastElements.ToastTitle.Parent = ToastElements.Container
-		
-		--// TTTextSizeConstraint
-		ToastElements.TTTextSizeConstraint.MaxTextSize = TTTextSize
-		ToastElements.TTTextSizeConstraint.Parent = ToastElements.ToastTitle
 		
 		--// ToastDescription
 		local TDTextSize = 14
@@ -91,19 +84,14 @@ local DynamicToasts = {
 		ToastElements.ToastDescription.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium)
 		ToastElements.ToastDescription.TextColor3 = Color3.new(1, 1, 1)
 		ToastElements.ToastDescription.TextSize = TDTextSize
-		ToastElements.ToastDescription.TextScaled = true
 		ToastElements.ToastDescription.TextTruncate = Enum.TextTruncate.AtEnd
 		ToastElements.ToastDescription.TextWrapped = true
 		ToastElements.ToastDescription.TextXAlignment = Enum.TextXAlignment.Right
 		ToastElements.ToastDescription.Parent = ToastElements.Container
 		
-		--// TDTextSizeConstraint
-		ToastElements.TDTextSizeConstraint.MaxTextSize = TDTextSize
-		ToastElements.TDTextSizeConstraint.Parent = ToastElements.ToastDescription
-		
 		--// FlexItem
 		ToastElements.FlexItem.FlexMode = Enum.UIFlexMode.Fill
-		ToastElements.FlexItem = ToastElements.ToastDescription
+		ToastElements.FlexItem.Parent = ToastElements.ToastDescription
 		
 		--// Corner
 		ToastElements.Corner.CornerRadius = UDim.new(0, 6)
