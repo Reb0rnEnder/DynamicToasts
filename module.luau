@@ -19,7 +19,8 @@ end
 local Config = {
 	ToastSize = UDim.new(250, 56),
 	ToastOffsetScreen = UDim.new(18, 28),
-	ToastOffsetLayout = UDim.new(0, 5)
+	ToastOffsetLayout = UDim.new(0, 5),
+	TweenSpeed = 0.25
 }
 
 local DynamicToasts = {
@@ -176,9 +177,9 @@ return function()
 
 				Toast.Container.Position = Late.Position
 				Toast.Container.Size = Late.Size
-				Toast.Container:TweenSizeAndPosition(Basic.Size, Basic.Position, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.125, true, function()
+				Toast.Container:TweenSizeAndPosition(Basic.Size, Basic.Position, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, Config.TweenSpeed, true, function()
 					task.wait(Duration or 5)
-					Toast.Container:TweenSizeAndPosition(Late.Size, Late.Position, Enum.EasingDirection.In, Enum.EasingStyle.Quart, 0.125, true, function()
+					Toast.Container:TweenSizeAndPosition(Late.Size, Late.Position, Enum.EasingDirection.In, Enum.EasingStyle.Quart, Config.TweenSpeed, true, function()
 						Toast.Toast:Destroy()
 					end)
 				end)
