@@ -111,8 +111,6 @@ local DynamicToasts = {
 		return ToastElements
 	end,
 	
-	LayoutOrder = -999999999,
-	
 	ContainerGui = (function()
 		if gethui then
 			return gethui()
@@ -125,6 +123,7 @@ local DynamicToasts = {
 }
 
 return function()
+	local LayoutOrder = -999999999
 	local UIElements = {
 		ScreenUI = Instance.new("ScreenGui"),
 		ToastContainer = Instance.new("Frame"),
@@ -161,8 +160,8 @@ return function()
 			DynamicToasts.ToastGradients[ToastType or 1]:Clone().Parent = Toast.Container
 			Toast.ToastTitle.Text = ToastTitle or "DynamicToasts"
 			Toast.ToastDescription.Text = ToastDescription or "?"
-			Toast.Toast.LayoutOrder = DynamicToasts.LayoutOrder
-			DynamicToasts.LayoutOrder += 1
+			Toast.Toast.LayoutOrder = LayoutOrder
+			LayoutOrder += 1
 			Toast.Toast.Parent = UIElements.ToastContainer
 			task.spawn(function()
 				local Basic = {
