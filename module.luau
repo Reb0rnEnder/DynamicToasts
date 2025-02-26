@@ -73,6 +73,8 @@ local DynamicToasts = {
 		ToastElements.ToastTitle.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.SemiBold)
 		ToastElements.ToastTitle.TextColor3 = Color3.new(1, 1, 1)
 		ToastElements.ToastTitle.TextSize = TTTextSize
+		ToastElements.ToastTitle.TextScaled = true
+		ToastElements.ToastTitle.TextTruncate = Enum.TextTruncate.AtEnd
 		ToastElements.ToastTitle.TextXAlignment = Enum.TextXAlignment.Right
 		ToastElements.ToastTitle.Parent = ToastElements.Container
 		
@@ -89,6 +91,9 @@ local DynamicToasts = {
 		ToastElements.ToastDescription.FontFace = Font.new("rbxassetid://12187365364", Enum.FontWeight.Medium)
 		ToastElements.ToastDescription.TextColor3 = Color3.new(1, 1, 1)
 		ToastElements.ToastDescription.TextSize = TDTextSize
+		ToastElements.ToastDescription.TextScaled = true
+		ToastElements.ToastDescription.TextTruncate = Enum.TextTruncate.AtEnd
+		ToastElements.ToastDescription.TextWrapped = true
 		ToastElements.ToastDescription.TextXAlignment = Enum.TextXAlignment.Right
 		ToastElements.ToastDescription.Parent = ToastElements.Container
 		
