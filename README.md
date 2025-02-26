@@ -1,4 +1,4 @@
-NOTE: Made in mind with Dynamic
+NOTE: Made in mind for Dynamic
 # DynamicToasts
 ## Usage
 Example:
