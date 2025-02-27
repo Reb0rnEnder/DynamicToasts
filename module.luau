@@ -1,7 +1,6 @@
 --// @RebornEnder 2025
 
 type deg = number
-
 local HttpService = game:GetService("HttpService")
 
 local Config = {
@@ -27,7 +26,8 @@ local function SmoothListLayout(MainGuiBase: GuiBase, Padding: UDim): ()
 	if not MainGuiBase then error("SmoothListLayout called but no GuiBase was provided.", 2) end
 	if not Padding then Padding = UDim.new(0, 0) end
 
-	local function UpdateLayout(): ()
+	local function UpdateLayout(GuiObject: GuiBase): ()
+		if not GuiObject:IsA("GuiBase") then return end
 		local GuiObjects: table = (function()
 			local tmp = {}
 			for _, obj in MainGuiBase:GetChildren() do
@@ -43,14 +43,12 @@ local function SmoothListLayout(MainGuiBase: GuiBase, Padding: UDim): ()
 
 		for index: number, object: GuiBase in GuiObjects do
 			index -= 1
-
 			local ObjectPosition = UDim2.new(
 				MainGuiBase.Size.X.Scale - object.Size.X.Scale,
 				MainGuiBase.Size.X.Offset - object.Size.X.Offset,
 				MainGuiBase.Size.Y.Scale - ((object.Size.Y.Scale + Padding.Scale) * index),
 				MainGuiBase.Size.Y.Offset - ((object.Size.Y.Offset + Padding.Offset) * index)
 			)
-
 			if index == 0 then
 				object.Position = ObjectPosition
 			else
@@ -59,17 +57,7 @@ local function SmoothListLayout(MainGuiBase: GuiBase, Padding: UDim): ()
 		end
 	end
 
-	local function TrackObject(GuiObject: GuiBase): ()
-		if not GuiObject:IsA("GuiBase") then return end
-		--[[local Connection = GuiObject.Changed:Connect(UpdateLayout)
-		GuiObject.Destroying:Connect(function()
-			Connection:Disconnect()
-		end)]] --// Disabled due to buggy behavior when tracking changes.
-
-		UpdateLayout()
-	end
-
-	MainGuiBase.ChildAdded:Connect(TrackObject)
+	MainGuiBase.ChildAdded:Connect(UpdateLayout)
 	MainGuiBase.ChildRemoved:Connect(UpdateLayout)
 end
 
@@ -80,14 +68,12 @@ local DynamicToasts = {
 		Warning = 3,
 		Bad = 4
 	},
-
 	ToastGradients = {
 		Color3ToGradient(30, Color3.fromRGB(0, 128, 255)),
 		Color3ToGradient(30, Color3.fromRGB(0, 255, 128)),
 		Color3ToGradient(30, Color3.fromRGB(255, 192, 0)),
 		Color3ToGradient(30, Color3.fromRGB(255, 0, 64))
 	},
-
 	RawToast = function()
 		local ToastElements = {
 			Toast = Instance.new("Frame"),
@@ -161,7 +147,6 @@ local DynamicToasts = {
 
 		return ToastElements
 	end,
-
 	ContainerGui = (function()
 		if gethui then
 			return gethui()
@@ -178,13 +163,11 @@ return function()
 	local UIElements = {
 		ScreenUI = Instance.new("ScreenGui"),
 		ToastContainer = Instance.new("Frame"),
-		--// ListLayout = Instance.new("UIListLayout")
 	}
 
 	--// ScreenUI
 	UIElements.ScreenUI.Name = "DynamicToasts"
 	UIElements.ScreenUI.DisplayOrder = 999999999
-	--// UIElements.ScreenUI.IgnoreGuiInset = true
 	UIElements.ScreenUI.ResetOnSpawn = false
 	UIElements.ScreenUI.Parent = DynamicToasts.ContainerGui
 
@@ -196,13 +179,8 @@ return function()
 	UIElements.ToastContainer.ClipsDescendants = true
 	UIElements.ToastContainer.Parent = UIElements.ScreenUI
 
-	--// ListLayout
+	--// SmoothListLayout
 	SmoothListLayout(UIElements.ToastContainer, Config.ToastOffsetLayout)
-	--UIElements.ListLayout.Padding = Config.ToastOffsetLayout
-	--UIElements.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	--UIElements.ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	--UIElements.ListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	--UIElements.ListLayout.Parent = UIElements.ToastContainer
 
 	return {
 		ToastType = DynamicToasts.ToastTypes,
@@ -216,16 +194,14 @@ return function()
 			LayoutOrder += 1
 			Toast.Toast.Parent = UIElements.ToastContainer
 			task.spawn(function()
-				local Basic = {
+				local Basic, Late = {
 					Position = Toast.Container.Position,
 					Size = Toast.Container.Size
-				}
-
-				local Late = {
+				}, {
 					Position = UDim2.new(-0.25, 0, 0.5, 0),
 					Size = UDim2.new(Toast.Container.Size.X.Scale / 4, Toast.Container.Size.X.Offset, Toast.Container.Size.Y.Scale / 4, Toast.Container.Size.Y.Offset)
 				}
-
+				
 				Toast.Container.Position = Late.Position
 				Toast.Container.Size = Late.Size
 				Toast.Container:TweenSizeAndPosition(Basic.Size, Basic.Position, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, Config.TweenSpeed, true, function()
@@ -235,6 +211,6 @@ return function()
 					end)
 				end)
 			end)
-		end,
+		end
 	}
 end
