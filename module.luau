@@ -4,6 +4,13 @@ type deg = number
 
 local HttpService = game:GetService("HttpService")
 
+local Config = {
+	ToastSize = UDim.new(250, 56),
+	ToastOffsetScreen = UDim.new(18, 28),
+	ToastOffsetLayout = UDim.new(0, 5),
+	TweenSpeed = 0.25
+}
+
 local function Color3ToGradient(Rotation: deg, Color: Color3)
 	local UIGradient = Instance.new("UIGradient")
 	UIGradient.Rotation = Rotation
@@ -16,12 +23,55 @@ local function Color3ToGradient(Rotation: deg, Color: Color3)
 	return UIGradient
 end
 
-local Config = {
-	ToastSize = UDim.new(250, 56),
-	ToastOffsetScreen = UDim.new(18, 28),
-	ToastOffsetLayout = UDim.new(0, 5),
-	TweenSpeed = 0.25
-}
+local function SmoothListLayout(MainGuiBase: GuiBase, Padding: UDim): ()
+	if not MainGuiBase then error("SmoothListLayout called but no GuiBase was provided.", 2) end
+	if not Padding then Padding = UDim.new(0, 0) end
+
+	local function UpdateLayout(): ()
+		local GuiObjects: table = (function()
+			local tmp = {}
+			for _, obj in MainGuiBase:GetChildren() do
+				if obj:IsA("GuiBase") then
+					table.insert(tmp, obj)
+				end
+			end	
+			table.sort(tmp, function(a: GuiBase, b: GuiBase)
+				return a.LayoutOrder > b.LayoutOrder
+			end)
+			return tmp
+		end)()
+
+		for index: number, object: GuiBase in GuiObjects do
+			index -= 1
+
+			local ObjectPosition = UDim2.new(
+				MainGuiBase.Size.X.Scale - object.Size.X.Scale,
+				MainGuiBase.Size.X.Offset - object.Size.X.Offset,
+				MainGuiBase.Size.Y.Scale - ((object.Size.Y.Scale + Padding.Scale) * index),
+				MainGuiBase.Size.Y.Offset - ((object.Size.Y.Offset + Padding.Offset) * index)
+			)
+
+			if index == 0 then
+				object.Position = ObjectPosition
+			else
+				object:TweenPosition(ObjectPosition, Enum.EasingDirection.Out, Enum.EasingStyle.Quart, Config.TweenSpeed, true)
+			end
+		end
+	end
+
+	local function TrackObject(GuiObject: GuiBase): ()
+		if not GuiObject:IsA("GuiBase") then return end
+		--[[local Connection = GuiObject.Changed:Connect(UpdateLayout)
+		GuiObject.Destroying:Connect(function()
+			Connection:Disconnect()
+		end)]] --// Disabled due to buggy behavior when tracking changes.
+
+		UpdateLayout()
+	end
+
+	MainGuiBase.ChildAdded:Connect(TrackObject)
+	MainGuiBase.ChildRemoved:Connect(UpdateLayout)
+end
 
 local DynamicToasts = {
 	ToastTypes = {
@@ -30,14 +80,14 @@ local DynamicToasts = {
 		Warning = 3,
 		Bad = 4
 	},
-	
+
 	ToastGradients = {
 		Color3ToGradient(30, Color3.fromRGB(0, 128, 255)),
 		Color3ToGradient(30, Color3.fromRGB(0, 255, 128)),
 		Color3ToGradient(30, Color3.fromRGB(255, 192, 0)),
 		Color3ToGradient(30, Color3.fromRGB(255, 0, 64))
 	},
-	
+
 	RawToast = function()
 		local ToastElements = {
 			Toast = Instance.new("Frame"),
@@ -49,12 +99,12 @@ local DynamicToasts = {
 			ListLayout = Instance.new("UIListLayout"),
 			Padding = Instance.new("UIPadding")
 		}
-		
+
 		--// Toast
 		ToastElements.Toast.Name = `Toast {HttpService:GenerateGUID(true)}`
 		ToastElements.Toast.BackgroundTransparency = 1
 		ToastElements.Toast.Size = UDim2.new(1, 0, 0, Config.ToastSize.Offset)
-		
+
 		--// Container
 		ToastElements.Container.Name = "Container"
 		ToastElements.Container.AnchorPoint = Vector2.new(1, 0.5)
@@ -62,7 +112,7 @@ local DynamicToasts = {
 		ToastElements.Container.Position = UDim2.new(1, 0, 0.5, 0)
 		ToastElements.Container.Size = UDim2.new(1, -Config.ToastOffsetScreen.Scale, 1, 0)
 		ToastElements.Container.Parent = ToastElements.Toast
-		
+
 		--// ToastTitle
 		local TTTextSize = 16
 		ToastElements.ToastTitle.Name = "ToastTitle"
@@ -75,7 +125,7 @@ local DynamicToasts = {
 		ToastElements.ToastTitle.TextTruncate = Enum.TextTruncate.AtEnd
 		ToastElements.ToastTitle.TextXAlignment = Enum.TextXAlignment.Right
 		ToastElements.ToastTitle.Parent = ToastElements.Container
-		
+
 		--// ToastDescription
 		local TDTextSize = 14
 		ToastElements.ToastDescription.Name = "ToastDescription"
@@ -89,29 +139,29 @@ local DynamicToasts = {
 		ToastElements.ToastDescription.TextWrapped = true
 		ToastElements.ToastDescription.TextXAlignment = Enum.TextXAlignment.Right
 		ToastElements.ToastDescription.Parent = ToastElements.Container
-		
+
 		--// FlexItem
 		ToastElements.FlexItem.FlexMode = Enum.UIFlexMode.Fill
 		ToastElements.FlexItem.Parent = ToastElements.ToastDescription
-		
+
 		--// Corner
 		ToastElements.Corner.CornerRadius = UDim.new(0, 6)
 		ToastElements.Corner.Parent = ToastElements.Container
-		
+
 		--// ListLayout
 		ToastElements.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 		ToastElements.ListLayout.Parent = ToastElements.Container
-		
+
 		--// Padding
 		ToastElements.Padding.PaddingBottom = UDim.new(0, 5)
 		ToastElements.Padding.PaddingLeft = UDim.new(0, 80)
 		ToastElements.Padding.PaddingRight = UDim.new(0, 10)
 		ToastElements.Padding.PaddingTop = UDim.new(0, 5)
 		ToastElements.Padding.Parent = ToastElements.Container
-		
+
 		return ToastElements
 	end,
-	
+
 	ContainerGui = (function()
 		if gethui then
 			return gethui()
@@ -128,16 +178,16 @@ return function()
 	local UIElements = {
 		ScreenUI = Instance.new("ScreenGui"),
 		ToastContainer = Instance.new("Frame"),
-		ListLayout = Instance.new("UIListLayout")
+		--// ListLayout = Instance.new("UIListLayout")
 	}
-	
+
 	--// ScreenUI
 	UIElements.ScreenUI.Name = "DynamicToasts"
 	UIElements.ScreenUI.DisplayOrder = 999999999
 	--// UIElements.ScreenUI.IgnoreGuiInset = true
 	UIElements.ScreenUI.ResetOnSpawn = false
 	UIElements.ScreenUI.Parent = DynamicToasts.ContainerGui
-	
+
 	--// ToastContainer
 	UIElements.ToastContainer.Name = "ToastContainer"
 	UIElements.ToastContainer.BackgroundTransparency = 1
@@ -145,14 +195,15 @@ return function()
 	UIElements.ToastContainer.Size = UDim2.new(0, Config.ToastSize.Scale + Config.ToastOffsetScreen.Scale, 1, -(Config.ToastOffsetScreen.Offset * 2))
 	UIElements.ToastContainer.ClipsDescendants = true
 	UIElements.ToastContainer.Parent = UIElements.ScreenUI
-	
+
 	--// ListLayout
-	UIElements.ListLayout.Padding = Config.ToastOffsetLayout
-	UIElements.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-	UIElements.ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
-	UIElements.ListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
-	UIElements.ListLayout.Parent = UIElements.ToastContainer
-	
+	SmoothListLayout(UIElements.ToastContainer, Config.ToastOffsetLayout)
+	--UIElements.ListLayout.Padding = Config.ToastOffsetLayout
+	--UIElements.ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	--UIElements.ListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Right
+	--UIElements.ListLayout.VerticalAlignment = Enum.VerticalAlignment.Bottom
+	--UIElements.ListLayout.Parent = UIElements.ToastContainer
+
 	return {
 		ToastType = DynamicToasts.ToastTypes,
 		NewToast = function(self, ToastType: number?, ToastTitle: string?, ToastDescription: string?, Duration: number?): ()
@@ -169,7 +220,7 @@ return function()
 					Position = Toast.Container.Position,
 					Size = Toast.Container.Size
 				}
-				
+
 				local Late = {
 					Position = UDim2.new(-0.25, 0, 0.5, 0),
 					Size = UDim2.new(Toast.Container.Size.X.Scale / 4, Toast.Container.Size.X.Offset, Toast.Container.Size.Y.Scale / 4, Toast.Container.Size.Y.Offset)
